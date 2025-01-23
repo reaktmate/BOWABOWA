@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOWABOWA | ただしいことばさがし</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    .question {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .image-container {
+      margin: 20px auto;
+      max-width: 300px;
+    }
+    img {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .choice {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+    }
+    .choice:hover {
+      background-color: #ddd;
+    }
+    .selected {
+      background-color: #8bc34a;
+      color: white;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>画像選択式クイズ</h1>
+  <div class="question" id="question">このがぞうはなんですか？</div>
+  <div class="image-container">
+    <img id="questionImage" src="" alt="問題画像">
+  </div>
+  <div id="choices"></div>
+  <div class="message" id="message"></div>
+  <button class="button" id="nextButton">つぎにいく</button>
+  <script>
+    // 問題データ（画像のURL、説明、選択肢）
+    const questions = [
+      {
+        img: "https://frame-illust.com/fi/wp-content/uploads/2017/03/9687.png",
+        text: "このどうぶつはなんですか？",
+        choices: ["いぬ", "ねこ", "バナナ"],
+        correct: "いぬ"
+      },
+      {
+        img: "https://frame-illust.com/fi/wp-content/uploads/2017/06/9919.png",
+        text: "このやさいはなんですか？すこしむずかしいよ",
+        choices: ["レタス", "キャベツ", "にわとり"],
+        correct: "レタス"
+      },
+      {
+        img: "https://frame-illust.com/fi/wp-content/uploads/2017/06/coffee-9934.png",
+        text: "こののみものはなんですか？",
+        text: "ヒント:こどもはあまりのまないよ",
+        choices: ["こうちゃ", "ジュース", "コーヒー"],
+        correct: "コーヒー"
+      },
+      {
+        img: "https://frame-illust.com/fi/wp-content/uploads/2016/04/7356.png",
+        text: "こののりものはなんですか？",
+        choices: ["じてんしゃ", "しょうぼうしゃ", "きゅうきゅうしゃ"],
+        correct: "きゅうきゅうしゃ"
+      },
+      {
+        img: "https://frame-illust.com/fi/wp-content/uploads/2015/03/4417bd35ef119a38759b5a7d7b7c56c0.png",
+        text: "これはなんですか？",
+        text: "ヒント:さむいときにつかうよ",
+        choices: ["ヒーター(だんぼうきぐ)", "せんぷうき", "うちわ"],
+        correct: "ヒーター(だんぼうきぐ)"
+      }
+    ];
+
+    let currentIndex = 0;
+    let selectedChoice = "";
+
+    const questionElement = document.getElementById("question");
+    const questionImage = document.getElementById("questionImage");
+    const choicesContainer = document.getElementById("choices");
+    const nextButton = document.getElementById("nextButton");
+    const messageElement = document.getElementById("message");
+
+    // 問題を表示
+    function showQuestion() {
+      if (currentIndex < questions.length) {
+        const currentQuestion = questions[currentIndex];
+        
+        questionElement.textContent = currentQuestion.text;
+        questionImage.src = currentQuestion.img;
+
+        // 選択肢の表示
+        choicesContainer.innerHTML = "";
+        currentQuestion.choices.forEach(choice => {
+          const choiceElement = document.createElement("div");
+          choiceElement.textContent = choice;
+          choiceElement.classList.add("choice");
+          choiceElement.addEventListener("click", () => handleChoice(choice));
+          choicesContainer.appendChild(choiceElement);
+        });
+
+        selectedChoice = "";  // 初期化
+        messageElement.textContent = ""; // メッセージの初期化
+        nextButton.disabled = true; // 次の問題ボタンを無効化
+      } else {
+        questionElement.textContent = "ぜんぶのもんだいがおわったよ。がんばったね！BOWABOWAにもどろう！";
+        questionImage.src = "https://frame-illust.com/fi/wp-content/uploads/2016/03/6738.png"; // 画像を非表示
+        choicesContainer.innerHTML = "";
+        nextButton.disabled = true;
+      }
+    }
+
+    // 選択肢をクリックしたときの処理
+    function handleChoice(choice) {
+      if (selectedChoice) return; // 既に選択されている場合は何もしない
+
+      selectedChoice = choice;
+      
+      // 選択肢の色を変更
+      const choiceElements = document.querySelectorAll(".choice");
+      choiceElements.forEach(element => {
+        element.classList.remove("selected");
+        if (element.textContent === choice) {
+          element.classList.add("selected");
+        }
+      });
+
+      // 正解チェック
+      const currentQuestion = questions[currentIndex];
+      if (selectedChoice === currentQuestion.correct) {
+        messageElement.textContent = "せいかい！";
+        messageElement.style.color = "green"; // 正解時は緑色
+      } else {
+        messageElement.textContent = "ふせいかい！もういちどがんばろう！";
+        messageElement.style.color = "red"; // 不正解時は赤色
+      }
+
+      nextButton.disabled = false; // 次の問題ボタンを有効化
+    }
+
+    nextButton.addEventListener("click", () => {
+      currentIndex++;
+      showQuestion();
+    });
+
+    // 初期状態で最初の問題を表示
+    showQuestion();
+  </script>
+</body>
+</html>
